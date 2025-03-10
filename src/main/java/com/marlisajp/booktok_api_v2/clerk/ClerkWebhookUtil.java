@@ -61,7 +61,6 @@ public class ClerkWebhookUtil {
 
     public ClerkWebhookResponse verifyPayload(String payload, HttpHeaders httpHeaders)
             throws WebhookVerificationException {
-        System.out.println("CLERK SIGNING KEY IN PAYLOAD!! " + CLERK_SIGNING_SECRET);
         if (CLERK_SIGNING_SECRET == null || CLERK_SIGNING_SECRET.isEmpty()) {
             throw new IllegalArgumentException("CLERK_SIGNING_SECRET must be set and non-empty");
         }
