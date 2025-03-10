@@ -26,23 +26,14 @@ public class UserService {
         this.bookcaseRepository = bookcaseRepository;
     }
 
-    public Optional<BookcaseDTO> getUserBookcaseByClerkId(String clerkId) throws Exception {
-        Optional<User> optionalUser = userRepository.findByClerkId(clerkId);
-
-        if(optionalUser.isEmpty()){
-            throw new Exception("User doesnt exist...");
-        }
-
-        return userRepository.findByClerkId(clerkId)
-                .map(User::getBookcase)
-                .map(this::mapToDto);
+    public BookcaseDTO getUserBookcaseByClerkId(String clerkId) throws Exception {
+        Bookcase bookcase = getUser(clerkId).getBookcase();
+        return mapToDto(bookcase);
     }
 
     public BookcaseDTO addBookToUserBookcase(Long bookId, String clerkId) throws Exception {
-        User user = userRepository.findByClerkId(clerkId)
-                .orElseThrow(() -> new Exception("User doesn't exist"));
+        Bookcase bookcase = getUser(clerkId).getBookcase();
 
-        Bookcase bookcase = user.getBookcase();
         if (bookcase == null) {
             throw new Exception("Bookcase doesn't exist for this user");
         }
@@ -53,9 +44,27 @@ public class UserService {
         bookcase.getBooks().addFirst(book);
 
         bookcaseRepository.save(bookcase);
-        userRepository.save(user);
-
         return mapToDto(bookcase);
+    }
+    
+    public BookcaseDTO deleteBookFromUserBookcase(Long bookId, String clerkId) throws Exception {
+        Bookcase bookcase = getUser(clerkId).getBookcase();
+
+        if (bookcase == null) {
+            throw new Exception("Bookcase doesn't exist for this user");
+        }
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new Exception("Book doesn't exist"));
+
+        bookcase.getBooks().remove(book);
+        bookcaseRepository.save(bookcase);
+        return mapToDto(bookcase);
+    }
+
+    private User getUser(String clerkId) throws Exception {
+        return userRepository.findByClerkId(clerkId)
+                .orElseThrow(() -> new Exception("User doesn't exist..."));
     }
 
     private BookcaseDTO mapToDto(Bookcase bookcase){
