@@ -41,6 +41,12 @@ public class UserService {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new Exception("Book doesn't exist"));
 
+        boolean bookExistsInBookcase = bookcase.getBooks().contains(book);
+
+        if(bookExistsInBookcase){
+            throw new Exception("Book is in users bookcase already.");
+        }
+
         bookcase.getBooks().addFirst(book);
 
         bookcaseRepository.save(bookcase);
