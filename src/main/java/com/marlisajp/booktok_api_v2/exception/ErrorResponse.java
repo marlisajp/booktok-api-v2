@@ -5,13 +5,15 @@ import org.springframework.http.HttpStatus;
 public class ErrorResponse {
     private HttpStatus status;
     private String message;
+    private int statusCode;
 
     public ErrorResponse() {
     }
 
-    public ErrorResponse(HttpStatus status, String message) {
+    public ErrorResponse(HttpStatus status, String message, int statusCode) {
         this.status = status;
         this.message = message;
+        this.statusCode = statusCode;
     }
 
     public HttpStatus getStatus() {
@@ -28,5 +30,12 @@ public class ErrorResponse {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
     }
 }

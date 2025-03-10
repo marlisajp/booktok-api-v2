@@ -45,7 +45,7 @@ public class UserService {
         boolean bookExistsInBookcase = bookcase.getBooks().contains(book);
 
         if(bookExistsInBookcase){
-            throw new GenericException(HttpStatus.BAD_REQUEST,"Book is in users bookcase already.");
+            throw new GenericException(HttpStatus.BAD_REQUEST,HttpStatus.BAD_REQUEST.value(),"Book is in users bookcase already.");
         }
 
         bookcase.getBooks().addFirst(book);

@@ -53,7 +53,7 @@ public class UserController {
             return ResponseEntity.ok(updatedBookcase);
         } catch (GenericException ex){
             return ResponseEntity.status(ex.getStatusCode())
-                    .body(new ErrorResponse(ex.getStatusCode(), ex.getErrorMessage()));
+                    .body(new ErrorResponse(ex.getStatus(), ex.getErrorMessage(), ex.getStatusCode()));
         } catch (Exception ex){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error adding book to bookcase: " + ex.getMessage());
