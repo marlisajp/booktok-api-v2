@@ -3,6 +3,7 @@ package com.marlisajp.booktok_api_v2.user;
 import com.marlisajp.booktok_api_v2.auth.AuthorizeUserService;
 import com.marlisajp.booktok_api_v2.clerk.ClerkWebhookResponse;
 import com.marlisajp.booktok_api_v2.dto.bookcase.BookcaseDTO;
+import com.marlisajp.booktok_api_v2.exception.ErrorResponse;
 import com.marlisajp.booktok_api_v2.exception.GenericException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +52,8 @@ public class UserController {
             BookcaseDTO updatedBookcase = userService.addBookToUserBookcase(bookId, clerkId);
             return ResponseEntity.ok(updatedBookcase);
         } catch (GenericException ex){
-            return ResponseEntity.status(ex.getStatusCode()).body(ex);
+            return ResponseEntity.status(ex.getStatusCode())
+                    .body(new ErrorResponse(ex.getStatusCode(), ex.getErrorMessage()));
         } catch (Exception ex){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error adding book to bookcase: " + ex.getMessage());
