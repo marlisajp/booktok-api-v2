@@ -8,6 +8,7 @@ import com.marlisajp.booktok_api_v2.bookcase.BookcaseRepository;
 import com.marlisajp.booktok_api_v2.dto.author.AuthorDTO;
 import com.marlisajp.booktok_api_v2.dto.book.BookDTO;
 import com.marlisajp.booktok_api_v2.dto.bookcase.BookcaseDTO;
+import com.marlisajp.booktok_api_v2.exception.GenericException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -44,7 +45,7 @@ public class UserService {
         boolean bookExistsInBookcase = bookcase.getBooks().contains(book);
 
         if(bookExistsInBookcase){
-            throw new Exception("Book is in users bookcase already.");
+            throw new GenericException(HttpStatus.BAD_REQUEST,"Book is in users bookcase already.");
         }
 
         bookcase.getBooks().addFirst(book);
