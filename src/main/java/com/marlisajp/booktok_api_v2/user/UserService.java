@@ -32,7 +32,7 @@ public class UserService {
         return mapToDto(bookcase);
     }
 
-    public BookcaseDTO addBookToUserBookcase(Long bookId, String clerkId) throws Exception {
+    public BookcaseDTO addBookToUserBookcase(Long bookId, String clerkId) throws Exception, GenericException {
         Bookcase bookcase = getUser(clerkId).getBookcase();
 
         if (bookcase == null) {
