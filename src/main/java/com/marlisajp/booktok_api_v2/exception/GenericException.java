@@ -13,6 +13,9 @@ public class GenericException extends RuntimeException {
         this.errorMessage = errorMessage;
     }
 
+    public GenericException(String message, Throwable cause) {
+    }
+
     public HttpStatus getStatus() {
         return status;
     }

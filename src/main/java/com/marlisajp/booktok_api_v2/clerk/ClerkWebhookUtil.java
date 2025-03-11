@@ -59,8 +59,7 @@ public class ClerkWebhookUtil {
         return HttpHeaders.of(headerMap, (key, value) -> true);
     }
 
-    public ClerkWebhookResponse verifyPayload(String payload, HttpHeaders httpHeaders)
-            throws WebhookVerificationException {
+    public ClerkWebhookResponse verifyPayload(String payload, HttpHeaders httpHeaders) throws WebhookVerificationException {
         if (CLERK_SIGNING_SECRET == null || CLERK_SIGNING_SECRET.isEmpty()) {
             throw new IllegalArgumentException("CLERK_SIGNING_SECRET must be set and non-empty");
         }

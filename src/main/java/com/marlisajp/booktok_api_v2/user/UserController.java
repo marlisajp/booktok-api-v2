@@ -24,59 +24,26 @@ public class UserController {
     }
 
     @GetMapping("/{clerkId}/bookcase")
-    public ResponseEntity<?> getUserBookcaseByClerkId(
-            @PathVariable("clerkId") String clerkId,
-            @AuthenticationPrincipal Jwt jwt) throws Exception {
-        ClerkWebhookResponse clerkWebhookResponse = authorizeUserService.authorize(clerkId, jwt);
-
-        if(clerkWebhookResponse.equals(ClerkWebhookResponse.USER_NOT_AUTHORIZED)){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authorized! Scram!");
-        }
-
+    public ResponseEntity<BookcaseDTO> getUserBookcaseByClerkId(@PathVariable("clerkId") String clerkId,
+                                                      @AuthenticationPrincipal Jwt jwt)  {
+        authorizeUserService.authorize(clerkId, jwt);
         return ResponseEntity.ok(userService.getUserBookcaseByClerkId(clerkId));
 
     }
 
     @PostMapping("/{clerkId}/bookcase/add/{bookId}")
-    public ResponseEntity<?> addBooktoUserBookcase(
-            @PathVariable("clerkId") String clerkId,
-            @PathVariable("bookId") Long bookId,
-            @AuthenticationPrincipal Jwt jwt) throws Exception {
-        ClerkWebhookResponse clerkWebhookResponse = authorizeUserService.authorize(clerkId,jwt);
+    public ResponseEntity<BookcaseDTO> addBooktoUserBookcase(@PathVariable("clerkId") String clerkId, @PathVariable("bookId") Long bookId,
+                                                   @AuthenticationPrincipal Jwt jwt) {
+        authorizeUserService.authorize(clerkId,jwt);
+        BookcaseDTO updatedBookcase = userService.addBookToUserBookcase(bookId, clerkId);
+        return ResponseEntity.ok(updatedBookcase);
 
-        if(clerkWebhookResponse.equals(ClerkWebhookResponse.USER_NOT_AUTHORIZED)){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authorized! Scram!");
-        }
-
-        try {
-            BookcaseDTO updatedBookcase = userService.addBookToUserBookcase(bookId, clerkId);
-            return ResponseEntity.ok(updatedBookcase);
-        } catch (GenericException ex){
-            return ResponseEntity.status(ex.getStatusCode())
-                    .body(new ErrorResponse(ex.getStatus(), ex.getErrorMessage(), ex.getStatusCode()));
-        } catch (Exception ex){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error adding book to bookcase: " + ex.getMessage());
-        }
     }
 
     @DeleteMapping("/{clerkId}/bookcase/delete/{bookId}")
-    public ResponseEntity<?> deleteBookFromUserBookcase(
-            @PathVariable("clerkId") String clerkId,
-            @PathVariable("bookId") Long bookId,
-            @AuthenticationPrincipal Jwt jwt) throws Exception {
-        ClerkWebhookResponse clerkWebhookResponse = authorizeUserService.authorize(clerkId,jwt);
-
-        if(clerkWebhookResponse.equals(ClerkWebhookResponse.USER_NOT_AUTHORIZED)){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authorized! Scram!");
-        }
-
-        try {
-            BookcaseDTO updatedBookcase = userService.deleteBookFromUserBookcase(bookId, clerkId);
-            return ResponseEntity.ok(updatedBookcase);
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error deleting book to bookcase: " + ex.getMessage());
-        }
+    public ResponseEntity<?> deleteBookFromUserBookcase(@PathVariable("clerkId") String clerkId, @PathVariable("bookId") Long bookId, @AuthenticationPrincipal Jwt jwt)  {
+        authorizeUserService.authorize(clerkId,jwt);
+        BookcaseDTO updatedBookcase = userService.deleteBookFromUserBookcase(bookId, clerkId);
+        return ResponseEntity.ok(updatedBookcase);
     }
 }

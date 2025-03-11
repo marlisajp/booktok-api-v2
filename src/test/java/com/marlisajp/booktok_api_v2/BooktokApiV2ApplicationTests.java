@@ -6,7 +6,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
-class BooktokApiV2ApplicationTests {
+public class BooktokApiV2ApplicationTests {
 
 	@Test
 	void contextLoads() {

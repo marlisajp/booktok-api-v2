@@ -1,5 +1,6 @@
 package com.marlisajp.booktok_api_v2.user;
 
+import com.marlisajp.booktok_api_v2.auth.AuthorizeUserService;
 import com.marlisajp.booktok_api_v2.book.Book;
 import com.marlisajp.booktok_api_v2.book.BookRepository;
 import com.marlisajp.booktok_api_v2.book.BookService;
@@ -9,6 +10,8 @@ import com.marlisajp.booktok_api_v2.dto.author.AuthorDTO;
 import com.marlisajp.booktok_api_v2.dto.book.BookDTO;
 import com.marlisajp.booktok_api_v2.dto.bookcase.BookcaseDTO;
 import com.marlisajp.booktok_api_v2.exception.GenericException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -20,6 +23,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
     private final BookcaseRepository bookcaseRepository;
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
 
     public UserService(UserRepository userRepository,BookRepository bookRepository, BookcaseRepository bookcaseRepository){
         this.userRepository = userRepository;
@@ -27,51 +32,73 @@ public class UserService {
         this.bookcaseRepository = bookcaseRepository;
     }
 
-    public BookcaseDTO getUserBookcaseByClerkId(String clerkId) throws Exception {
+    public BookcaseDTO getUserBookcaseByClerkId(String clerkId) {
         Bookcase bookcase = getUser(clerkId).getBookcase();
+        logger.info("User successfully retrieved their bookcase");
         return mapToDto(bookcase);
     }
 
-    public BookcaseDTO addBookToUserBookcase(Long bookId, String clerkId) throws Exception, GenericException {
+    public BookcaseDTO addBookToUserBookcase(Long bookId, String clerkId) {
         Bookcase bookcase = getUser(clerkId).getBookcase();
 
         if (bookcase == null) {
-            throw new Exception("Bookcase doesn't exist for this user");
+            throw new GenericException(HttpStatus.NOT_FOUND,
+                    HttpStatus.NOT_FOUND.value(),
+                    "No bookcase was found");
         }
 
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new Exception("Book doesn't exist"));
+                .orElseThrow(() -> new GenericException(HttpStatus.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value(),
+                        "Book does not exist"));
 
         boolean bookExistsInBookcase = bookcase.getBooks().contains(book);
 
         if(bookExistsInBookcase){
-            throw new GenericException(HttpStatus.BAD_REQUEST,HttpStatus.BAD_REQUEST.value(),"Book is in users bookcase already.");
+            throw new GenericException(HttpStatus.BAD_REQUEST,
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Book already in bookcase");
         }
 
         bookcase.getBooks().addFirst(book);
-
         bookcaseRepository.save(bookcase);
+        logger.info("User successfully added book to their bookcase");
         return mapToDto(bookcase);
     }
     
-    public BookcaseDTO deleteBookFromUserBookcase(Long bookId, String clerkId) throws Exception {
+    public BookcaseDTO deleteBookFromUserBookcase(Long bookId, String clerkId){
         Bookcase bookcase = getUser(clerkId).getBookcase();
 
         if (bookcase == null) {
-            throw new Exception("Bookcase doesn't exist for this user");
+            throw new GenericException(HttpStatus.NOT_FOUND,
+                    HttpStatus.NOT_FOUND.value(),
+                    "No bookcase was found");
         }
 
         Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new Exception("Book doesn't exist"));
+                .orElseThrow(() -> new GenericException(HttpStatus.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value(),
+                        "Book does not exist"));
+
+        boolean bookInBookcase = bookcase.getBooks().contains(book);
+
+        if(!bookInBookcase){
+            throw new GenericException(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.value(),
+                    "Book is not in this bookcase. Cannot delete.");
+        }
 
         bookcase.getBooks().remove(book);
         bookcaseRepository.save(bookcase);
+        logger.info("User successfully deleted book from their bookcase");
         return mapToDto(bookcase);
     }
 
-    private User getUser(String clerkId) throws Exception {
+    private User getUser(String clerkId) {
         return userRepository.findByClerkId(clerkId)
-                .orElseThrow(() -> new Exception("User doesn't exist..."));
+                .orElseThrow(() -> new GenericException(
+                        HttpStatus.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value(),
+                        "User doesnt exist."));
     }
 
     private BookcaseDTO mapToDto(Bookcase bookcase){

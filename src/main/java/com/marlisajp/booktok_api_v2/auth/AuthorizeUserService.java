@@ -1,8 +1,9 @@
 package com.marlisajp.booktok_api_v2.auth;
 
-import com.marlisajp.booktok_api_v2.clerk.ClerkWebhookResponse;
+import com.marlisajp.booktok_api_v2.exception.GenericException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
@@ -15,15 +16,17 @@ public class AuthorizeUserService {
         this.clerkTokenService = clerkTokenService;
     }
 
-    public ClerkWebhookResponse authorize(String clerkId, Jwt jwt){
+    public void authorize(String clerkId, Jwt jwt){
         String clerkIdFromToken = clerkTokenService.getClerkIdFromToken(jwt);
 
         if(!clerkIdFromToken.equals(clerkId)){
-            logger.info("User is not authorized to access resource");
-            return ClerkWebhookResponse.USER_NOT_AUTHORIZED;
+            logger.error("User {} is not authorized to access resource",clerkId);
+            throw new GenericException(
+                    HttpStatus.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value(),
+                    "User is not authorized to access this resource");
         } else {
-            logger.info("User is authorized to access resource");
-            return ClerkWebhookResponse.USER_AUTHORIZED;
+            logger.info("User has been authorized to access resource");
         }
     }
 }
