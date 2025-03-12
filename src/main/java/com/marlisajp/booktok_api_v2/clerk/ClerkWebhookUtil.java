@@ -28,25 +28,23 @@ public class ClerkWebhookUtil {
 
         String clerkId = userData.get("id").asText();
         String emailAddress = "";
-        String fullName = "";
+        String username = "";
 
         if (userData.has("email_addresses") && userData.get("email_addresses").isArray()
                 && !userData.get("email_addresses").isEmpty()) {
             emailAddress = userData.get("email_addresses").get(0).get("email_address").asText();
         }
 
-        if (userData.has("fullName")) {
-            fullName = userData.get("fullName").asText();
+        if (userData.has("username")) {
+            username = userData.get("username").asText();
         } else {
-            String firstName = userData.has("first_name") ? userData.get("first_name").asText() : "";
-            String lastName = userData.has("last_name") ? userData.get("last_name").asText() : "";
-            fullName = (firstName + " " + lastName).trim();
+            username = userData.get("email_addresses").get(0).get("email_address").asText();
         }
 
         return ClerkUserData.builder()
                 .clerkId(clerkId)
                 .emailAddress(emailAddress)
-                .fullName(fullName).build();
+                .username(username).build();
     }
 
     public HttpHeaders convertHeaders(org.springframework.http.HttpHeaders springHeaders){

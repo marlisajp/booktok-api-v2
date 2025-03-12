@@ -40,13 +40,13 @@ public class ClerkWebhookService {
         User newUser = User.builder()
                 .clerkId(clerkUser.getClerkId())
                 .emailAddress(clerkUser.getEmailAddress())
-                .fullName(clerkUser.getFullName())
+                .username(clerkUser.getUsername())
                 .bookcase(new Bookcase())
                 .build();
 
         newUser.getBookcase().setUser(newUser);
         userRepository.save(newUser);
-        logger.info("Created new user: {}", newUser);
+        logger.info("Created new user: {}", newUser.getUsername());
         return ClerkWebhookResponse.USER_CREATED_SUCCESS;
     }
 
@@ -75,7 +75,7 @@ public class ClerkWebhookService {
             return ClerkWebhookResponse.USER_DOESNT_EXIST;
         }
         User foundUser = optionalUser.get();
-        foundUser.setFullName(clerkUser.getFullName());
+        foundUser.setUsername(clerkUser.getUsername());
         foundUser.setEmailAddress(clerkUser.getEmailAddress());
         userRepository.save(foundUser);
         logger.info("Updated user: {}", foundUser);

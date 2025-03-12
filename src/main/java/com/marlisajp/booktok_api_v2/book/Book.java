@@ -2,7 +2,10 @@ package com.marlisajp.booktok_api_v2.book;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.marlisajp.booktok_api_v2.author.Author;
+import com.marlisajp.booktok_api_v2.post.Post;
 import jakarta.persistence.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "book")
@@ -19,16 +22,20 @@ public class Book {
     @JsonIgnore
     private Author author;
 
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Post> posts;
+
     public Book() {
     }
 
-    public Book(Long id, String title, String imageUrl, String description, String genre, Author author) {
+    public Book(Long id, String title, String imageUrl, String description, String genre, Author author, List<Post> posts) {
         this.id = id;
         this.title = title;
         this.imageUrl = imageUrl;
         this.description = description;
         this.genre = genre;
         this.author = author;
+        this.posts = posts;
     }
 
     public Long getId() {
@@ -79,6 +86,14 @@ public class Book {
         this.author = author;
     }
 
+    public List<Post> getPosts() {
+        return posts;
+    }
+
+    public void setPosts(List<Post> posts) {
+        this.posts = posts;
+    }
+
     public static Builder builder(){
         return new Builder();
     }
@@ -90,6 +105,7 @@ public class Book {
         private String description;
         private String genre;
         private Author author;
+        private List<Post> posts;
 
         public Builder id(Long id){
             this.id = id;
@@ -121,8 +137,13 @@ public class Book {
             return this;
         }
 
+        public Builder posts(List<Post> posts){
+            this.posts = posts;
+            return this;
+        }
+
         public Book build(){
-            return new Book(id, title,imageUrl, description, genre, author);
+            return new Book(id, title,imageUrl, description, genre, author, posts);
         }
     }
 }

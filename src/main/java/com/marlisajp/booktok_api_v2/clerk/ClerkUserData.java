@@ -3,12 +3,12 @@ package com.marlisajp.booktok_api_v2.clerk;
 public class ClerkUserData {
     private String clerkId;
     private String emailAddress;
-    private String fullName;
+    private String username;
 
-    public ClerkUserData(String clerkId, String emailAddress, String fullName) {
+    public ClerkUserData(String clerkId, String emailAddress, String username) {
         this.clerkId = clerkId;
         this.emailAddress = emailAddress;
-        this.fullName = fullName;
+        this.username = username;
     }
 
     public String getClerkId() {
@@ -27,12 +27,12 @@ public class ClerkUserData {
         this.emailAddress = emailAddress;
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getUsername() {
+        return username;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public static Builder builder(){
@@ -42,7 +42,7 @@ public class ClerkUserData {
     public static class Builder {
         private String clerkId;
         private String emailAddress;
-        private String fullName;
+        private String username;
 
         public Builder clerkId(String clerkId){
             this.clerkId = clerkId;
@@ -54,13 +54,13 @@ public class ClerkUserData {
             return this;
         }
 
-        public Builder fullName(String fullName){
-            this.fullName = fullName;
+        public Builder username(String username){
+            this.username = username;
             return this;
         }
 
         public ClerkUserData build(){
-            return new ClerkUserData(clerkId, emailAddress, fullName);
+            return new ClerkUserData(clerkId, emailAddress, username);
         }
     }
 
@@ -69,7 +69,7 @@ public class ClerkUserData {
         return "ClerkUserData{" +
                 "clerkId='" + clerkId + '\'' +
                 ", emailAddress='" + emailAddress + '\'' +
-                ", fullName='" + fullName + '\'' +
+                ", username='" + username + '\'' +
                 '}';
     }
 }
