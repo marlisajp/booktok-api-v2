@@ -2,6 +2,7 @@ package com.marlisajp.booktok_api_v2.post;
 
 import com.marlisajp.booktok_api_v2.book.Book;
 import com.marlisajp.booktok_api_v2.book.BookRepository;
+import com.marlisajp.booktok_api_v2.dto.comment.CommentDTO;
 import com.marlisajp.booktok_api_v2.dto.post.PostDTO;
 import com.marlisajp.booktok_api_v2.exception.GenericException;
 import com.marlisajp.booktok_api_v2.user.User;
@@ -79,12 +80,23 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
+    public List<PostDTO> getAllUsersPosts() {
+        return postRepository.findAll().stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
     private PostDTO mapToDto(Post post){
         return new PostDTO(
                 post.getId(),
                 post.getTitle(),
                 post.getContent(),
-                post.getComments(),
+                post.getComments().stream().map(comment -> new CommentDTO(
+                        comment.getId(),
+                        comment.getContent(),
+                        comment.getUser().getUsername(),
+                        comment.getCreatedAt()))
+                        .collect(Collectors.toList()),
                 post.getUser().getUsername(),
                 post.getBook().getTitle(),
                 post.getBook().getAuthor().getName(),

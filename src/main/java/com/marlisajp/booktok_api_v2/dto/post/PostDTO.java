@@ -1,6 +1,6 @@
 package com.marlisajp.booktok_api_v2.dto.post;
 
-import com.marlisajp.booktok_api_v2.comment.Comment;
+import com.marlisajp.booktok_api_v2.dto.comment.CommentDTO;
 
 import java.time.Instant;
 import java.util.List;
@@ -9,7 +9,7 @@ public class PostDTO {
     private Long id;
     private String title;
     private String content;
-    private List<Comment> comments;
+    private List<CommentDTO> comments;
     private String username;
     private String bookTitle;
     private String bookAuthor;
@@ -18,7 +18,7 @@ public class PostDTO {
     public PostDTO() {
     }
 
-    public PostDTO(Long id, String title, String content, List<Comment> comments, String username, String bookTitle, String bookAuthor, Instant createdAt) {
+    public PostDTO(Long id, String title, String content, List<CommentDTO> comments, String username, String bookTitle, String bookAuthor, Instant createdAt) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -53,11 +53,11 @@ public class PostDTO {
         this.content = content;
     }
 
-    public List<Comment> getComments() {
+    public List<CommentDTO> getComments() {
         return comments;
     }
 
-    public void setComments(List<Comment> comments) {
+    public void setComments(List<CommentDTO> comments) {
         this.comments = comments;
     }
 
