@@ -2,6 +2,7 @@ package com.marlisajp.booktok_api_v2.clerk;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.marlisajp.booktok_api_v2.bookcase.Bookcase;
+import com.marlisajp.booktok_api_v2.exception.GenericException;
 import com.marlisajp.booktok_api_v2.exception.UserCreationException;
 import com.marlisajp.booktok_api_v2.user.User;
 import com.marlisajp.booktok_api_v2.user.UserRepository;
@@ -46,39 +47,30 @@ public class ClerkWebhookService {
 
         newUser.getBookcase().setUser(newUser);
         userRepository.save(newUser);
-        logger.info("Created new user: {}", newUser.getUsername());
+        logger.info("Created new user: {}", newUser.getClerkId());
         return ClerkWebhookResponse.USER_CREATED_SUCCESS;
     }
 
     public ClerkWebhookResponse deleteUserFromDatabase(JsonNode userData) {
-        ClerkUserData clerkUser = clerkWebhookUtil.extractUserData(userData);
+        String clerkId = userData.get("id").asText();
+        User user = userRepository.findByClerkId(clerkId)
+                .orElseThrow(() -> new GenericException(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.value(), "User does not exist"));
 
-        Optional<User> optionalUser = userRepository.findByClerkId(clerkUser.getClerkId());
-        if (optionalUser.isEmpty()) {
-            logger.info("User with clerkId {} not found in database...", clerkUser.getClerkId());
-            return ClerkWebhookResponse.USER_DOESNT_EXIST;
-        }
-
-        User foundUser = optionalUser.get();
-        userRepository.delete(foundUser);
-        logger.info("Deleted user {} from Booktok Database...", clerkUser);
+        userRepository.delete(user);
+        logger.info("Deleted {} from booktokdb...", clerkId);
         return ClerkWebhookResponse.USER_DELETED_SUCCESS;
     }
 
 
     public ClerkWebhookResponse updateUserInDatabase(JsonNode userData) {
         ClerkUserData clerkUser = clerkWebhookUtil.extractUserData(userData);
+        User user = userRepository.findByClerkId(clerkUser.getClerkId())
+                .orElseThrow(() -> new GenericException(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.value(), "User does not exist"));
 
-        Optional<User> optionalUser = userRepository.findByClerkId(clerkUser.getClerkId());
-        if (optionalUser.isEmpty()) {
-            logger.info("User with Clerk Id {} does not exist in database.", clerkUser.getClerkId());
-            return ClerkWebhookResponse.USER_DOESNT_EXIST;
-        }
-        User foundUser = optionalUser.get();
-        foundUser.setUsername(clerkUser.getUsername());
-        foundUser.setEmailAddress(clerkUser.getEmailAddress());
-        userRepository.save(foundUser);
-        logger.info("Updated user: {}", foundUser);
+        user.setUsername(clerkUser.getUsername());
+        user.setEmailAddress(clerkUser.getEmailAddress());
+        userRepository.save(user);
+        logger.info("Updated user: {}", user.getClerkId());
         return ClerkWebhookResponse.USER_UPDATED_SUCCESS;
     }
 

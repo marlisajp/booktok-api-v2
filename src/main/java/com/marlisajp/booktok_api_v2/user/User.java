@@ -159,9 +159,9 @@ public class User {
                 ", clerkId='" + clerkId + '\'' +
                 ", emailAddress='" + emailAddress + '\'' +
                 ", username='" + username + '\'' +
-                ", bookcase=" + bookcase +
-                ", posts=" + posts +
-                ", comments=" + comments +
+                ", bookcase=" + bookcase.toString() +
+                ", posts=" + posts.toString() +
+                ", comments=" + comments.toString() +
                 '}';
     }
 

@@ -1,11 +1,13 @@
 package com.marlisajp.booktok_api_v2.clerk;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.marlisajp.booktok_api_v2.exception.GenericException;
 import com.svix.Webhook;
 import com.svix.exceptions.WebhookVerificationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.net.http.HttpHeaders;
@@ -23,22 +25,27 @@ public class ClerkWebhookUtil {
     public ClerkUserData extractUserData(JsonNode userData){
         if(userData == null || !userData.has("id")){
             logger.info("userData is null or id property does not exist: {} ", userData);
-            throw new IllegalArgumentException("User Data must contain Id field and not be null");
+            throw new GenericException(
+                    HttpStatus.BAD_REQUEST,
+                    HttpStatus.BAD_REQUEST.value(),
+                    "User Data must contain Id field and not be null");
         }
 
         String clerkId = userData.get("id").asText();
         String emailAddress = "";
         String username = "";
 
-        if (userData.has("email_addresses") && userData.get("email_addresses").isArray()
-                && !userData.get("email_addresses").isEmpty()) {
-            emailAddress = userData.get("email_addresses").get(0).get("email_address").asText();
+        if (userData.has("email_addresses") && userData.get("email_addresses") != null &&
+                userData.get("email_addresses").isArray() && !userData.get("email_addresses").isEmpty()) {
+            emailAddress = userData.get("email_addresses").get(0).get("email_address").asText("");
         }
 
-        if (userData.has("username")) {
-            username = userData.get("username").asText();
-        } else {
-            username = userData.get("email_addresses").get(0).get("email_address").asText();
+        if (userData.has("username") && userData.get("username") != null) {
+            username = userData.get("username").asText("");
+        } else if (userData.has("first_name") || userData.has("last_name")) {
+            String firstName = userData.has("first_name") && userData.get("first_name") != null ? userData.get("first_name").asText("") : "";
+            String lastName = userData.has("last_name") && userData.get("last_name") != null ? userData.get("last_name").asText("") : "";
+            username = (firstName + " " + lastName).trim();
         }
 
         return ClerkUserData.builder()
