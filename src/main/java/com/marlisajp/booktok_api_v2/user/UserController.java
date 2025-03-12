@@ -1,13 +1,17 @@
 package com.marlisajp.booktok_api_v2.user;
 
 import com.marlisajp.booktok_api_v2.auth.AuthorizeUserService;
+import com.marlisajp.booktok_api_v2.clerk.ClerkWebhookResponse;
 import com.marlisajp.booktok_api_v2.comment.CommentRequest;
 import com.marlisajp.booktok_api_v2.comment.CommentService;
 import com.marlisajp.booktok_api_v2.dto.bookcase.BookcaseDTO;
 import com.marlisajp.booktok_api_v2.dto.comment.CommentDTO;
 import com.marlisajp.booktok_api_v2.dto.post.PostDTO;
+import com.marlisajp.booktok_api_v2.post.Post;
 import com.marlisajp.booktok_api_v2.post.PostRequest;
 import com.marlisajp.booktok_api_v2.post.PostService;
+import com.marlisajp.booktok_api_v2.response.ApiResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -30,46 +34,94 @@ public class UserController {
     }
 
     @GetMapping("/{clerkId}/bookcase")
-    public ResponseEntity<BookcaseDTO> getUserBookcaseByClerkId(@PathVariable("clerkId") String clerkId, @AuthenticationPrincipal Jwt jwt)  {
+    public ApiResponse<BookcaseDTO> getUserBookcaseByClerkId(@PathVariable("clerkId") String clerkId, @AuthenticationPrincipal Jwt jwt)  {
         authorizeUserService.authorize(clerkId, jwt);
-        return ResponseEntity.ok(userService.getUserBookcaseByClerkId(clerkId));
+        BookcaseDTO bookcaseDTO = userService.getUserBookcaseByClerkId(clerkId);
+        return new ApiResponse<BookcaseDTO>(
+                HttpStatus.OK,
+                HttpStatus.OK.value(),
+                "Retrieved user's bookcase by clerk ID",
+                true,
+                bookcaseDTO
+        );
     }
 
     @PostMapping("/{clerkId}/bookcase/add/{bookId}")
-    public ResponseEntity<BookcaseDTO> addBooktoUserBookcase(@PathVariable("clerkId") String clerkId, @PathVariable("bookId") Long bookId, @AuthenticationPrincipal Jwt jwt) {
+    public ApiResponse<BookcaseDTO> addBooktoUserBookcase(@PathVariable("clerkId") String clerkId, @PathVariable("bookId") Long bookId, @AuthenticationPrincipal Jwt jwt) {
         authorizeUserService.authorize(clerkId,jwt);
         BookcaseDTO updatedBookcase = userService.addBookToUserBookcase(bookId, clerkId);
-        return ResponseEntity.ok(updatedBookcase);
+        return new ApiResponse<BookcaseDTO>(
+                HttpStatus.CREATED,
+                HttpStatus.CREATED.value(),
+                "Added book to user's bookcase",
+                true,
+                updatedBookcase
+        );
     }
 
     @DeleteMapping("/{clerkId}/bookcase/delete/{bookId}")
-    public ResponseEntity<BookcaseDTO> deleteBookFromUserBookcase(@PathVariable("clerkId") String clerkId, @PathVariable("bookId") Long bookId, @AuthenticationPrincipal Jwt jwt)  {
+    public ApiResponse<BookcaseDTO> deleteBookFromUserBookcase(@PathVariable("clerkId") String clerkId, @PathVariable("bookId") Long bookId, @AuthenticationPrincipal Jwt jwt)  {
         authorizeUserService.authorize(clerkId,jwt);
         BookcaseDTO updatedBookcase = userService.deleteBookFromUserBookcase(bookId, clerkId);
-        return ResponseEntity.ok(updatedBookcase);
+        return new ApiResponse<BookcaseDTO>(
+                HttpStatus.ACCEPTED,
+                HttpStatus.ACCEPTED.value(),
+                "Deleted book from user's bookcase",
+                true,
+                updatedBookcase
+        );
     }
 
     @GetMapping("/{clerkId}/posts/all")
-    public ResponseEntity<List<PostDTO>> getUsersPosts(@PathVariable("clerkId") String clerkId, @AuthenticationPrincipal Jwt jwt){
+    public ApiResponse<List<PostDTO>> getUsersPosts(@PathVariable("clerkId") String clerkId, @AuthenticationPrincipal Jwt jwt){
         authorizeUserService.authorize(clerkId,jwt);
         List<PostDTO> postDTOS = postService.getUsersPosts(clerkId);
-        return ResponseEntity.ok(postDTOS);
+        return new ApiResponse<List<PostDTO>>(
+                HttpStatus.OK,
+                HttpStatus.OK.value(),
+                "Retrieved all posts belonging to user",
+                true,
+                postDTOS
+        );
     }
 
 
     @PostMapping("/{clerkId}/posts/add")
-    public ResponseEntity<PostDTO> createPost(@PathVariable("clerkId") String clerkId, @RequestBody PostRequest postRequest, @AuthenticationPrincipal Jwt jwt){
+    public ApiResponse<PostDTO> createPost(@PathVariable("clerkId") String clerkId, @RequestBody PostRequest postRequest, @AuthenticationPrincipal Jwt jwt){
         authorizeUserService.authorize(clerkId,jwt);
         PostDTO postDTO = postService.createPost(postRequest, clerkId);
-        return ResponseEntity.ok(postDTO);
+        return new ApiResponse<PostDTO>(
+                HttpStatus.CREATED,
+                HttpStatus.CREATED.value(),
+                "Created a new post",
+                true,
+                postDTO
+        );
+    }
+
+    @DeleteMapping("/{clerkId}/posts/delete/{postId}")
+    public ApiResponse<ClerkWebhookResponse> deletePost(@PathVariable("clerkId") String clerkId, @PathVariable("postId") Long postId, @AuthenticationPrincipal Jwt jwt){
+        authorizeUserService.authorize(clerkId,jwt);
+        ClerkWebhookResponse response = postService.deletePost(clerkId, postId);
+        return new ApiResponse<ClerkWebhookResponse>(
+                HttpStatus.OK,
+                HttpStatus.OK.value(),
+                "Deleted user's post",
+                true,
+                response
+        );
     }
 
     @PostMapping("/{clerkId}/posts/add-comment")
-    public ResponseEntity<CommentDTO> addCommentToPost(@PathVariable("clerkId") String clerkId, @RequestBody CommentRequest commentRequest, @AuthenticationPrincipal Jwt jwt){
+    public ApiResponse<CommentDTO> addCommentToPost(@PathVariable("clerkId") String clerkId, @RequestBody CommentRequest commentRequest, @AuthenticationPrincipal Jwt jwt){
         authorizeUserService.authorize(clerkId,jwt);
         CommentDTO commentDTO = commentService.addCommentToPost(commentRequest, clerkId);
-        return ResponseEntity.ok(commentDTO);
+        return new ApiResponse<CommentDTO>(
+                HttpStatus.CREATED,
+                HttpStatus.CREATED.value(),
+                "Created new comment under post",
+                true,
+                commentDTO
+        );
     }
-
-
 }

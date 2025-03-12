@@ -2,9 +2,11 @@ package com.marlisajp.booktok_api_v2.post;
 
 import com.marlisajp.booktok_api_v2.book.Book;
 import com.marlisajp.booktok_api_v2.book.BookRepository;
+import com.marlisajp.booktok_api_v2.clerk.ClerkWebhookResponse;
 import com.marlisajp.booktok_api_v2.dto.comment.CommentDTO;
 import com.marlisajp.booktok_api_v2.dto.post.PostDTO;
 import com.marlisajp.booktok_api_v2.exception.GenericException;
+import com.marlisajp.booktok_api_v2.response.ApiResponse;
 import com.marlisajp.booktok_api_v2.user.User;
 import com.marlisajp.booktok_api_v2.user.UserRepository;
 import org.slf4j.Logger;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -65,7 +68,7 @@ public class PostService {
         user.getPosts().addFirst(newPost);
         postRepository.save(newPost);
         userRepository.save(user);
-        logger.info("User {} created a new post for {}", user.getClerkId(), book.getTitle());
+        logger.info("User {} created a new post for {}", newPost.getUser().getClerkId(), newPost.getBook().getTitle());
         return mapToDto(newPost);
     }
 
@@ -80,10 +83,40 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
-    public List<PostDTO> getAllUsersPosts() {
-        return postRepository.findAll().stream()
+    public ApiResponse<List<PostDTO>> getAllUsersPosts() {
+        List<PostDTO> posts = postRepository.findAll().stream()
                 .map(this::mapToDto)
-                .collect(Collectors.toList());
+                .toList();
+
+        return new ApiResponse<List<PostDTO>>(
+                HttpStatus.ACCEPTED,
+                HttpStatus.ACCEPTED.value(),
+                "Retrieved all posts by all users",
+                true,
+                posts
+        );
+    }
+
+    public ClerkWebhookResponse deletePost(String clerkId, Long postId) {
+        User user = userRepository.findByClerkId(clerkId).orElseThrow(() -> new GenericException(
+                HttpStatus.NOT_FOUND,
+                HttpStatus.NOT_FOUND.value(),
+                "User does not exist"
+        ));
+
+        Post postToDelete = user.getPosts().stream()
+                .filter(post -> postId.equals(post.getId()))
+                .findFirst()
+                .orElseThrow(() -> new GenericException(
+                        HttpStatus.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value(),
+                        "Post does not exist or belong to user"));
+
+        user.getPosts().remove(postToDelete);
+        postRepository.delete(postToDelete);
+        userRepository.save(user);
+        logger.info("Deleted post with id {} for user {}", postId, clerkId);
+        return ClerkWebhookResponse.POST_DELETED_SUCCESS;
     }
 
     private PostDTO mapToDto(Post post){

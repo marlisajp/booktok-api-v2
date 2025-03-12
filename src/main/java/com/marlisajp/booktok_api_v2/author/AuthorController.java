@@ -2,6 +2,8 @@ package com.marlisajp.booktok_api_v2.author;
 
 import com.marlisajp.booktok_api_v2.dto.author.AuthorDTO;
 import com.marlisajp.booktok_api_v2.dto.author.AuthorDetailDTO;
+import com.marlisajp.booktok_api_v2.dto.bookcase.BookcaseDTO;
+import com.marlisajp.booktok_api_v2.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +16,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/public/api/authors")
 public class AuthorController {
-
     private final AuthorService authorService;
 
     public AuthorController(AuthorService authorService) {
@@ -22,15 +23,26 @@ public class AuthorController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AuthorDetailDTO> findAuthorById(@PathVariable("id") Long id){
-        return authorService.findAuthorById(id)
-                .map(author -> ResponseEntity.status(HttpStatus.OK).body(author))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    public ApiResponse<AuthorDetailDTO> findAuthorById(@PathVariable("id") Long id){
+        AuthorDetailDTO author = authorService.findAuthorById(id);
+        return new ApiResponse<AuthorDetailDTO>(
+                HttpStatus.OK,
+                HttpStatus.OK.value(),
+                "Retrieved author with id: " + id,
+                true,
+                author
+        );
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<AuthorDTO>> findAllAuthors(){
+    public ApiResponse<List<AuthorDTO>> findAllAuthors(){
         List<AuthorDTO> authors = authorService.findAllAuthors();
-        return ResponseEntity.ok(authors);
+        return new ApiResponse<List<AuthorDTO>>(
+                HttpStatus.OK,
+                HttpStatus.OK.value(),
+                "Retrieved all authors",
+                true,
+                authors
+        );
     }
 }

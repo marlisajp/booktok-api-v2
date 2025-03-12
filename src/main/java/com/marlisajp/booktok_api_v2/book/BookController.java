@@ -1,6 +1,8 @@
 package com.marlisajp.booktok_api_v2.book;
 
 import com.marlisajp.booktok_api_v2.dto.book.BookDTO;
+import com.marlisajp.booktok_api_v2.dto.comment.CommentDTO;
+import com.marlisajp.booktok_api_v2.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,15 +22,25 @@ public class BookController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BookDTO> findBookById(@PathVariable("id") Long id){
-        return bookService.findBookById(id)
-                .map(book -> ResponseEntity.status(HttpStatus.OK).body(book))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    public ApiResponse<BookDTO> findBookById(@PathVariable("id") Long id){
+        BookDTO bookDTO = bookService.findBookById(id);
+        return new ApiResponse<BookDTO>(
+                HttpStatus.OK,
+                HttpStatus.OK.value(),
+                "Retrieved book with id: " + id,
+                true,
+                bookDTO
+        );
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<BookDTO>> findAllBooks(){
+    public ApiResponse<List<BookDTO>> findAllBooks(){
         List<BookDTO> books = bookService.findAllBooks();
-        return ResponseEntity.ok(books);
-    }
+        return new ApiResponse<List<BookDTO>>(
+                HttpStatus.OK,
+                HttpStatus.OK.value(),
+                "Retrieved all books",
+                true,
+                books
+        );    }
 }

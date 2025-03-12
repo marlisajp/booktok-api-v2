@@ -3,6 +3,8 @@ package com.marlisajp.booktok_api_v2.book;
 import com.marlisajp.booktok_api_v2.author.Author;
 import com.marlisajp.booktok_api_v2.dto.author.AuthorDTO;
 import com.marlisajp.booktok_api_v2.dto.book.BookDTO;
+import com.marlisajp.booktok_api_v2.exception.GenericException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,9 +19,10 @@ public class BookService {
         this.bookRepository = bookRepository;
     }
 
-    public Optional<BookDTO> findBookById(Long id){
+    public BookDTO findBookById(Long id){
         return bookRepository.findById(id)
-                .map(this::mapToDto);
+                .map(this::mapToDto)
+                .orElseThrow(() -> new GenericException(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.value(), "Book does not exist"));
     }
 
     public List<BookDTO> findAllBooks() {

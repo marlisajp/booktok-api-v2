@@ -2,6 +2,7 @@ package com.marlisajp.booktok_api_v2.post;
 
 import com.marlisajp.booktok_api_v2.dto.post.PostDTO;
 import com.marlisajp.booktok_api_v2.exception.GenericException;
+import com.marlisajp.booktok_api_v2.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -21,7 +22,7 @@ public class PostController {
     }
 
     @GetMapping("/all")
-    public List<PostDTO> getAllPosts(@AuthenticationPrincipal Jwt jwt){
+    public ApiResponse<List<PostDTO>> getAllPosts(@AuthenticationPrincipal Jwt jwt){
         if(jwt == null){
             throw new GenericException(HttpStatus.UNAUTHORIZED,
                     HttpStatus.UNAUTHORIZED.value(),
