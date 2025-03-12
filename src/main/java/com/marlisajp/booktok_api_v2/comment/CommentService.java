@@ -25,7 +25,6 @@ public class CommentService {
     }
 
     public CommentDTO addCommentToPost(CommentRequest commentRequest, String clerkId){
-        // 0. check for non empty comment request
         if(commentRequest == null
                 || commentRequest.getPostId() == null
                 || commentRequest.getContent() == null
@@ -34,34 +33,26 @@ public class CommentService {
             throw new GenericException(HttpStatus.BAD_REQUEST, HttpStatus.BAD_REQUEST.value(), "Comment request cannot be empty or have empty fields.");
         }
 
-        // 1. find post
-        // 2. if post doesnt exist, throw error
         Long postId = commentRequest.getPostId();
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new GenericException(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.value(), "Post does not exist."
         ));
 
-        // 3. find user
-        // 4. if user doesnt exist, throw error
         User user = userRepository.findByClerkId(clerkId)
                 .orElseThrow(() -> new GenericException(HttpStatus.NOT_FOUND, HttpStatus.NOT_FOUND.value(), "User does not exist."));
 
-        // 5. create comment
         Comment comment = Comment.builder()
                 .content(commentRequest.getContent())
                 .post(post)
                 .user(user)
                 .build();
 
-        // 6. add comment to post and user
         post.getComments().addLast(comment);
         user.getComments().add(comment);
 
-        // 7. save
         commentRepository.save(comment);
         postRepository.save(post);
         userRepository.save(user);
-        // 8. return CommentDTO
         logger.info("User {} created a new comment for post {}", user.getClerkId(), post.getId());
         return mapToDto(comment);
     }
