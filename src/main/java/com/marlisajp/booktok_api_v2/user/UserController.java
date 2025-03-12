@@ -64,8 +64,8 @@ public class UserController {
         authorizeUserService.authorize(clerkId,jwt);
         BookcaseDTO updatedBookcase = userService.deleteBookFromUserBookcase(bookId, clerkId);
         return new ApiResponse<BookcaseDTO>(
-                HttpStatus.ACCEPTED,
-                HttpStatus.ACCEPTED.value(),
+                HttpStatus.OK,
+                HttpStatus.OK.value(),
                 "Deleted book from user's bookcase",
                 true,
                 updatedBookcase
