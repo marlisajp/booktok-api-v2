@@ -1,5 +1,6 @@
 package com.marlisajp.booktok_api_v2.comment;
 
+import com.marlisajp.booktok_api_v2.clerk.ClerkWebhookResponse;
 import com.marlisajp.booktok_api_v2.dto.comment.CommentDTO;
 import com.marlisajp.booktok_api_v2.exception.GenericException;
 import com.marlisajp.booktok_api_v2.post.Post;
@@ -55,6 +56,39 @@ public class CommentService {
         userRepository.save(user);
         logger.info("User {} created a new comment for post {}", user.getClerkId(), post.getId());
         return mapToDto(comment);
+    }
+
+    public ClerkWebhookResponse deleteCommentFromPost(String clerkId, Long commentId) {
+        User user = userRepository.findByClerkId(clerkId)
+                .orElseThrow(() -> new GenericException(
+                        HttpStatus.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value(),
+                        "User does not exist"
+                ));
+
+        Comment commentToDelete = user.getComments().stream()
+                .filter(comment -> commentId.equals(comment.getId()))
+                .findFirst()
+                .orElseThrow(() -> new GenericException(
+                        HttpStatus.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value(),
+                        "Comment does not exist for this user"
+                ));
+
+        Post post = postRepository.findById(commentToDelete.getPost().getId())
+                .orElseThrow(() -> new GenericException(
+                        HttpStatus.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value(),
+                        "Post does not exist"
+                ));
+
+        user.getComments().remove(commentToDelete);
+        post.getComments().remove(commentToDelete);
+        commentRepository.delete(commentToDelete);
+        userRepository.save(user);
+        postRepository.save(post);
+        logger.info("Deleted comment with id {} for user {}", commentId, clerkId);
+        return ClerkWebhookResponse.COMMENT_DELETED_SUCCESS;
     }
 
     private CommentDTO mapToDto(Comment comment) {

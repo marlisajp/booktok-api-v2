@@ -7,12 +7,10 @@ import com.marlisajp.booktok_api_v2.comment.CommentService;
 import com.marlisajp.booktok_api_v2.dto.bookcase.BookcaseDTO;
 import com.marlisajp.booktok_api_v2.dto.comment.CommentDTO;
 import com.marlisajp.booktok_api_v2.dto.post.PostDTO;
-import com.marlisajp.booktok_api_v2.post.Post;
 import com.marlisajp.booktok_api_v2.post.PostRequest;
 import com.marlisajp.booktok_api_v2.post.PostService;
 import com.marlisajp.booktok_api_v2.response.ApiResponse;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -122,6 +120,19 @@ public class UserController {
                 "Created new comment under post",
                 true,
                 commentDTO
+        );
+    }
+
+    @DeleteMapping("/{clerkId}/posts/delete-comment/{commentId}")
+    public ApiResponse<ClerkWebhookResponse> deleteCommentFromPost(@PathVariable("clerkId") String clerkId, @PathVariable("commentId") Long commentId, @AuthenticationPrincipal Jwt jwt){
+        authorizeUserService.authorize(clerkId, jwt);
+        ClerkWebhookResponse response = commentService.deleteCommentFromPost(clerkId, commentId);
+        return new ApiResponse<ClerkWebhookResponse>(
+                HttpStatus.OK,
+                HttpStatus.OK.value(),
+                "Deleted comment from post",
+                true,
+                response
         );
     }
 }

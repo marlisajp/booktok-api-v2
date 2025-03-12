@@ -7,3 +7,6 @@ mvn spring-boot:run -Dspring-boot.run.profiles=dev
 - `/api/books/{id}`: Returns one book with author data
 - `/api/authors/all`: Returns all authors
 - `/api/authors/{id}`: Returns one author with all books data
+
+todos
+- add friend logic
