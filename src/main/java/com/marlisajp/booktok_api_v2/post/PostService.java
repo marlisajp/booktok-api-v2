@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -63,20 +65,30 @@ public class PostService {
         postRepository.save(newPost);
         userRepository.save(user);
         logger.info("User {} created a new post for {}", user.getClerkId(), book.getTitle());
-        return mapToDto(newPost, user.getUsername(), book);
+        return mapToDto(newPost);
     }
 
-    private PostDTO mapToDto(Post post, String username, Book book){
+    public List<PostDTO> getUsersPosts(String clerkId) {
+        User user = userRepository.findByClerkId(clerkId)
+                .orElseThrow(() -> new GenericException(
+                        HttpStatus.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value(),
+                        "User does not exist."));
+        return user.getPosts().stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    private PostDTO mapToDto(Post post){
         return new PostDTO(
                 post.getId(),
                 post.getTitle(),
                 post.getContent(),
                 post.getComments(),
-                username,
-                book.getTitle(),
-                book.getAuthor().getName(),
+                post.getUser().getUsername(),
+                post.getBook().getTitle(),
+                post.getBook().getAuthor().getName(),
                 post.getCreatedAt()
         );
     }
-
 }

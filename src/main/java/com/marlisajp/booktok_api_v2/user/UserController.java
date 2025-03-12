@@ -13,6 +13,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -47,6 +49,14 @@ public class UserController {
         return ResponseEntity.ok(updatedBookcase);
     }
 
+    @GetMapping("/{clerkId}/posts/all")
+    public ResponseEntity<List<PostDTO>> getUsersPosts(@PathVariable("clerkId") String clerkId, @AuthenticationPrincipal Jwt jwt){
+        authorizeUserService.authorize(clerkId,jwt);
+        List<PostDTO> postDTOS = postService.getUsersPosts(clerkId);
+        return ResponseEntity.ok(postDTOS);
+    }
+
+
     @PostMapping("/{clerkId}/posts/add")
     public ResponseEntity<PostDTO> createPost(@PathVariable("clerkId") String clerkId, @RequestBody PostRequest postRequest, @AuthenticationPrincipal Jwt jwt){
         authorizeUserService.authorize(clerkId,jwt);
@@ -60,4 +70,6 @@ public class UserController {
         CommentDTO commentDTO = commentService.addCommentToPost(commentRequest, clerkId);
         return ResponseEntity.ok(commentDTO);
     }
+
+
 }
